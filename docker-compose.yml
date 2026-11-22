@@ -1,0 +1,26 @@
+# UseAgent — single docker compose full-stack (starter)
+# Source: https://github.com/useagenthq/useagent
+# Original needs Bun + Postgres 16 with pgvector + sandbox-provider key + model keys across 9 workspaces.
+# This starter is the target shape: one `docker compose up` for frontend + backend + Postgres.
+# Add an Ollama / local free-model path so it can run without a paid provider key.
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: useagent
+      POSTGRES_PASSWORD: change-me
+      POSTGRES_DB: useagent
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  backend:
+    image: useagent/backend:latest
+    depends_on: [postgres]
+    environment:
+      DATABASE_URL: postgres://useagent:change-me@postgres:5432/useagent
+      # OLLAMA_URL: http://host.docker.internal:11434
+  frontend:
+    image: useagent/frontend:latest
+    depends_on: [backend]
+    ports: ["3000:3000"]
+volumes:
+  pgdata:
