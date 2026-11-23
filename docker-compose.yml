@@ -1,8 +1,14 @@
-# UseAgent — single docker compose full-stack (starter)
+# UseAgent — self-host from source (no published images)
 # Source: https://github.com/useagenthq/useagent
-# Original needs Bun + Postgres 16 with pgvector + sandbox-provider key + model keys across 9 workspaces.
-# This starter is the target shape: one `docker compose up` for frontend + backend + Postgres.
-# Add an Ollama / local free-model path so it can run without a paid provider key.
+# Upstream publishes NO useagent/backend or useagent/frontend images — the
+# old compose file used those names, so `docker compose up` would fail on
+# pull. Upstream's own install is from source (bun + Postgres 16 pgvector),
+# and the repo root has Dockerfile.backend / Dockerfile.frontend — so build
+# them here instead. Place this file in the cloned repo root, then run:
+#   docker compose up -d --build
+# Backend on :3201, frontend UI on :3400 (proxies /api/* to the backend).
+# Sandbox provider key + model keys still needed per upstream README;
+# for a free path set OLLAMA_URL=http://host.docker.internal:11434.
 services:
   postgres:
     image: pgvector/pgvector:pg16
@@ -13,14 +19,19 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
   backend:
-    image: useagent/backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
     depends_on: [postgres]
     environment:
       DATABASE_URL: postgres://useagent:change-me@postgres:5432/useagent
       # OLLAMA_URL: http://host.docker.internal:11434
+    ports: ["3201:3201"]
   frontend:
-    image: useagent/frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
     depends_on: [backend]
-    ports: ["3000:3000"]
+    ports: ["3400:3400"]
 volumes:
   pgdata:

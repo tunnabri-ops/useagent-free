@@ -2,11 +2,17 @@
 
 Source: https://github.com/useagenthq/useagent
 
-## এক কমান্ডে চালান
+## চালানোর উপায়
 ```
-docker compose up -d
+git clone https://github.com/useagenthq/useagent.git
+cd useagent
+# এই repo-র docker-compose.yml ফাইলটি এখানে (repo root-এ) রাখুন
+docker compose up -d --build
 ```
-তারপর http://localhost:3000 খুলুন।
+তারপর http://localhost:3400 খুলুন (backend :3201)।
+
+## আগের ভুলটা কী ছিল
+আগের compose ফাইলে `useagent/backend:latest` আর `useagent/frontend:latest` ইমেজ ব্যবহার করা হয়েছিল — ওই নামে কোনো পাবলিশড ইমেজ নেই, তাই `docker compose up` পুল করতে গিয়ে ফেল করতো। এখন Dockerfile.backend / Dockerfile.frontend দিয়ে সোর্স থেকে বিল্ড হয়।
 
 ## কী লাগবে
 - Docker + Docker Compose
